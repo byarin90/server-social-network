@@ -15,10 +15,18 @@ const authCtrl = {
       user.password = (await bcrypt.hash(user.password, salt)) as string;
       // Save the new user
       await user.save();
+      delete user.password;
       res.status(201).send(user);
     } catch (error) {
-      if (error.code === 11000) {
-        return res.status(400).send({ error: "Email already exists" });
+      if (error.code === 11000 && error.keyPattern.email) {
+        return res
+          .status(400)
+          .send({ error: "Email already exists", err: error });
+      }
+      if (error.code === 11000 && error.keyPattern.username) {
+        return res
+          .status(400)
+          .send({ error: "Username already exists", err: error });
       }
       if (error instanceof z.ZodError) {
         console.log(error);
@@ -62,10 +70,19 @@ const authCtrl = {
       }
 
       // Create a JWT token
-      const token = createJWT(user);
-
-      // Set the JWT token in a HttpOnly cookie
-      res.cookie("token", token, { httpOnly: true, sameSite: "lax" });
+      const accessToken = createJWT(user,'1m');
+      const refreshToken = createJWT(user,'2m');
+      user.refreshToken = refreshToken;
+      await user.save();
+      // Send tokens in http-only cookies
+      res.cookie("access_token", accessToken, {
+        httpOnly: true,
+        sameSite: "lax",
+      });
+      res.cookie("refresh_token", refreshToken, {
+        httpOnly: true,
+        sameSite: "lax",
+      });
 
       // Send response
       res.status(200).json({ message: "Logged in successfully" });
@@ -79,10 +96,12 @@ const authCtrl = {
       }
     }
   },
-  logout: (req: Request, res: Response) => {
+  logout: async(req: Request, res: Response) => {
     // Clear the token cookie
-    res.clearCookie("token");
-
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
+    const {_id} = req.payload;
+    await User.findByIdAndUpdate(_id, {refreshToken: null});
     // Send response
     res.status(200).json({ message: "Logged out successfully" });
   },

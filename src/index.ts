@@ -4,6 +4,9 @@ import { connectDB } from './db/dbConfiguration';
 import { routesInit } from './routes/configRoutes';
 import cookieParser from 'cookie-parser';
 import { secret } from './configuration/secret';
+import cors from 'cors';
+
+
 
 dotenv.config();
 
@@ -14,6 +17,10 @@ const port = secret.PORT;
 connectDB();
 routesInit(app);
 
+app.use(cors({ 
+  origin: '*', 
+  credentials: true 
+}));
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
