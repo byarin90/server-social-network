@@ -8,6 +8,7 @@ export interface IUser extends Document {
     bio: string;
     role: string;
     refreshToken?: string;
+    isActive: boolean;
 }
 
 const UserSchema: Schema = new Schema({
@@ -17,7 +18,8 @@ const UserSchema: Schema = new Schema({
     profilePicture: { type: String },
     bio: { type: String },
     role: { type: String, default: 'user' },
-    refreshToken: { type: String }
-});
+    refreshToken: { type: String, default: null },
+    isActive: { type: Boolean, default: true } // Add this line
+}, { timestamps: true });
 
 export const User= mongoose.model<IUser>('User', UserSchema);

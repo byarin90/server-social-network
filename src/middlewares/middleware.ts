@@ -34,7 +34,6 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
   try {
     const decoded = jwt.verify(accessToken, secret.JWT_SECRET) as IDecodedToken;
     req.payload = decoded;
-    console.log('usingToken')
     next();
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
@@ -56,8 +55,6 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
         const newAccessToken = createJWT(user,'1m');
         res.cookie('access_token', newAccessToken, { httpOnly: true, sameSite: 'lax' });
         req.payload = decodedRefreshToken;
-        console.log('usingRefreshToken')
-
         next();
       });
     } else {

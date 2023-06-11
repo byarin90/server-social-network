@@ -29,7 +29,6 @@ const authCtrl = {
           .send({ error: "Username already exists", err: error });
       }
       if (error instanceof z.ZodError) {
-        console.log(error);
         // Validation error
         return res.status(400).send({ error: error.errors });
       } else {
@@ -100,8 +99,9 @@ const authCtrl = {
     // Clear the token cookie
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
-    const {_id} = req.payload;
-    await User.findByIdAndUpdate(_id, {refreshToken: null});
+   const id = req.payload._id;
+   console.log(req.payload);
+    await User.updateOne({_id:id}, {refreshToken: null});
     // Send response
     res.status(200).json({ message: "Logged out successfully" });
   },
@@ -109,6 +109,21 @@ const authCtrl = {
     // This route is now protected
     res.json({ msg: "You're authenticated!", role: req.payload.role });
   },
+  isActiveToggle: async (req: Request, res: Response) => {
+    try{
+      const { _id } = req.payload;
+      const user = await User.findById(_id);
+      user.isActive = !user.isActive;
+      await user.save();
+      if(user.isActive){
+        return res.json({msg: "User is active"});
+      }else{
+        return res.json({msg: "User is inactive"});
+      }
+    }catch(err){
+      return res.status(500).json({msg: err.message})
+    }
+  }
 };
 
 export default authCtrl;
