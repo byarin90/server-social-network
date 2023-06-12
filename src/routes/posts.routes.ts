@@ -28,4 +28,5 @@ router.put("/:postId", authenticateUser, postCtrl.updatePost);
 // Delete a post by ID (needs authentication)
 router.delete("/:postId", authenticateUser, postCtrl.deletePost);
 
+router.delete("/:postId/:commentId", authenticateUser, postCtrl.deleteCommentFromPost);
 export default router;
