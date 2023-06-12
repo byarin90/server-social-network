@@ -34,8 +34,10 @@ const postCtrl = {
       const post = await Post.findById(req.params.postId)
         .populate("user", "firstName lastName profilePicture") // populate 'user' and select 'username' and 'profilePicture' fields
         .sort({ createdAt: -1 });
+      if(!post)
+       return res.status(404).json({ message: "Post not found" })
 
-      res.status(200).json(post);
+      return res.status(200).json(post)
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
