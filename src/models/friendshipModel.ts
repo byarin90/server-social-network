@@ -1,17 +1,22 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IMessage extends Document {
+export interface IFriendship extends Document {
     sender: string;
     receiver: string;
-    content: string;
+    status: string;
     timestamp: Date;
 }
 
-const MessageSchema: Schema = new Schema({
+const FriendshipSchema: Schema = new Schema({
     sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     receiver: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    content: { type: String, required: true },
+    status: { 
+        type: String, 
+        enum: ['pending', 'accepted', 'declined'], 
+        default: 'pending',
+        required: true 
+    },
     timestamp: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<IMessage>('Message', MessageSchema);
+export default mongoose.model<IFriendship>('Friendship', FriendshipSchema);

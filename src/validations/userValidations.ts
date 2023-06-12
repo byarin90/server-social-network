@@ -16,12 +16,16 @@ const passwordSchema = z.string()
   })
   .refine(password => /(?=.*[_\W])/.test(password), {
     message: "Password must include at least one special character."
-  });
+  }).refine(password => password.length < 40, {
+    message: "Password must be less than 40 characters long."
+  })
 
 export const userValidation = {
   UserSchema: (bodyData: IUser) => {
     const schema = z.object({
-      username: z.string(),
+      firstName: z.string().max(30),
+      lastName: z.string().max(30),
+      username: z.string().max(30),
       email: z.string().email(),
       password: passwordSchema,
       profilePicture: z.string().url().optional(),
