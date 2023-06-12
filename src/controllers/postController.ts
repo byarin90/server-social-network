@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Post, { IPost } from "../models/postModel";
 import { postValidation } from "../validations/postValidation";
 import { z } from "zod";
+import { IComment } from "../models/commentModel";
 
 const postCtrl = {
   getAllPosts: async (req: Request, res: Response) => {
@@ -34,10 +35,9 @@ const postCtrl = {
       const post = await Post.findById(req.params.postId)
         .populate("user", "firstName lastName profilePicture") // populate 'user' and select 'username' and 'profilePicture' fields
         .sort({ createdAt: -1 });
-      if(!post)
-       return res.status(404).json({ message: "Post not found" })
+      if (!post) return res.status(404).json({ message: "Post not found" });
 
-      return res.status(200).json(post)
+      return res.status(200).json(post);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -97,32 +97,7 @@ const postCtrl = {
       res.status(500).json({ message: error.message });
     }
   },
-  deleteCommentFromPost: async (req: Request, res: Response) => {
-    const { postId, commentId } = req.params;
-    const { _id } = req.payload;
-    try {
-      const post = await Post.findById(postId);
-      if (!post) {
-        return res.status(404).json({ message: "Post not found" });
-      }
-
-      if (post.user != _id) {
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      const comment = post.comments.find((comment) => comment == commentId) as any;
-      if (!comment) {
-        return res.status(404).json({ message: "Comment not found" });
-      }
-
-      const index = post.comments.indexOf(comment);
-      post.comments.splice(index, 1);
-      await post.save();
-      res.status(200).json(post);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
+ 
 };
 
 export default postCtrl;

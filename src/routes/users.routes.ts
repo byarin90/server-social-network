@@ -10,17 +10,15 @@ router.get("/", (req: Request, res: Response) => {
   res.json({ msg: "Users is up!" });
 });
 
-
 //?Authentification
-router.post("/register",authCtrl.signUp);
+router.post("/register", authCtrl.signUp);
 router.post("/login", authCtrl.login);
-router.post('/logout',authenticateUser, authCtrl.logout);
-router.get('/protected', authenticateUser,authCtrl.protected);
-router.patch('/isActive',authenticateUser, authCtrl.isActiveToggle);
-
+router.post("/logout", authenticateUser, authCtrl.logout);
+router.get("/protected", authenticateUser, authCtrl.protected);
+router.patch("/isActive", authenticateUser, authCtrl.isActiveToggle);
 
 // ? profile
-router.get("/myProfile",authenticateUser,userCtrl.getProfile)
-router.get("/:id", userCtrl.getProfileById);
+router.get("/myProfile", authenticateUser, userCtrl.getProfile);
+router.get("/:id", authenticateUser, userCtrl.getProfileById);
 
 export default router;
