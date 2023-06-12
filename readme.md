@@ -169,3 +169,87 @@ The application consists of a set of API endpoints that allow interaction with t
 - **Comment Routes**: Comment creation, retrieval, update and deletion, Liking and unliking comments
 - **Message Routes**: Message sending, retrieval, and deletion
 - **Friendship Routes**: Friend request management, Friend retrieval, Friend request acceptance and rejection, Friendship deletion
+
+
+## Models
+
+- **User**:
+    - **username**: String, required, unique
+    - **email**: String, required, unique
+    - **password**: String, required
+    - **profilePicture**: String, default: ""
+    - **bio**: String, default: ""
+    - **createdAt**: Date, default: Date.now
+    - **updatedAt**: Date, default: Date.now
+
+- **Post**:
+    - **user**: ObjectId, required, ref: "User"
+    - **text**: String, required
+    - **image**: String, default: ""
+    - **likes**: Array, default: []
+    - **comments**: Array, default: []
+    - **createdAt**: Date, default: Date.now
+    - **updatedAt**: Date, default: Date.now
+
+- **Comment**:
+    - **user**: ObjectId, required, ref: "User"
+    - **post**: ObjectId, required, ref: "Post"
+    - **text**: String, required
+    - **likes**: Array, default: []
+    - **createdAt**: Date, default: Date.now
+    - **updatedAt**: Date, default: Date.now
+    
+- **Message**:
+    - **sender**: ObjectId, required, ref: "User"
+    - **receiver**: ObjectId, required, ref: "User"
+    - **text**: String, required
+    - **createdAt**: Date, default: Date.now
+    - **updatedAt**: Date, default: Date.now
+
+- **Friendship**:
+    - **sender**: ObjectId, required, ref: "User"
+    - **receiver**: ObjectId, required, ref: "User"
+    - **status**: String, required, enum: ["pending", "accepted", "rejected"], default: "pending"
+    - **createdAt**: Date, default: Date.now
+    - **updatedAt**: Date, default: Date.now
+
+## User Stories
+- As a user, I want to be able to register for an account using my email address and password.
+
+- As a user, I want to be able to login to my account using my email address and password.
+
+- As a user, I want to be able to logout of my account.
+
+- As a user, I want to be able to update my profile details.
+
+- As a user, I want to be able to delete my account.
+
+- As a user, I want to be able to create a post.
+
+- As a user, I want to be able to update my posts.
+
+- As a user, I want to be able to delete my posts.
+
+- As a user, I want to be able to like and unlike posts.
+
+- As a user, I want to be able to comment on posts.
+
+- As a user, I want to be able to update my comments.
+
+- As a user, I want to be able to delete my comments.
+
+- As a user, I want to be able to like and unlike comments.
+
+- As a user, I want to be able to send messages to other users.
+
+- As a user, I want to be able to delete my messages.
+
+- As a user, I want to be able to send friend requests to other users.
+
+- As a user, I want to be able to accept or reject friend requests.
+
+- As a user, I want to be able to delete my friends.
+
+
+
+
