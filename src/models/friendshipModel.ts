@@ -1,9 +1,10 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { IUser } from './userModel';
 
 export interface IFriendship extends Document {
-    sender: string;
-    receiver: string;
-    status: string;
+    sender: string | IUser;
+    receiver: string | IUser;
+    status:'pending' | 'accepted' | 'declined' ;
     timestamp: Date;
 }
 

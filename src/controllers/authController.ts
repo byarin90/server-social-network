@@ -4,6 +4,8 @@ import { userValidation } from "../validations/userValidations";
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import { createJWT } from "../utils/jwtUtil";
+import { secret } from "../configuration/secret";
+import RefreshToken from "../models/refreshTokenModel";
 const authCtrl = {
   signUp: async (req: Request, res: Response) => {
     try {
@@ -69,10 +71,16 @@ const authCtrl = {
       }
 
       // Create a JWT token
-      const accessToken = createJWT(user,'1m');
-      const refreshToken = createJWT(user,'2m');
-      user.refreshToken = refreshToken;
-      await user.save();
+      const accessToken = createJWT(user,secret.TTL_ACCESS_TOKEN);
+      const refreshToken = createJWT(user,secret.TTL_REFRESH_TOKEN);
+      //if user was logged in before, delete the refresh token from the database
+      await RefreshToken.deleteMany({ user: user._id });
+      // Save the refresh token in the database
+      const newRefreshToken = new RefreshToken({
+        user: user._id,
+        token: refreshToken,
+      });
+      await newRefreshToken.save();
       // Send tokens in http-only cookies
       res.cookie("access_token", accessToken, {
         httpOnly: true,
@@ -100,8 +108,8 @@ const authCtrl = {
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
    const id = req.payload._id;
-   console.log(req.payload);
-    await User.updateOne({_id:id}, {refreshToken: null});
+    // Delete the refresh token from the database
+    await RefreshToken.deleteMany({ user: id });
     // Send response
     res.status(200).json({ message: "Logged out successfully" });
   },

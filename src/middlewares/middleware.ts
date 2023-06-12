@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { secret } from '../configuration/secret';
-import { User } from "../models/userModel";
+import { IUser, User } from "../models/userModel";
 import { createJWT } from "../utils/jwtUtil";
+import RefreshToken from '../models/refreshTokenModel';
 
 interface IDecodedToken {
   _id: string;
@@ -38,21 +39,27 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       if (!refreshToken) {
+        console.log(1)
         return res.status(401).json({ errorCode: 'MW401', errorMessage: 'Refresh token not found. Please login again.' });
       }
       jwt.verify(refreshToken, secret.JWT_SECRET, async (err: jwt.VerifyErrors | null, decodedToken: object | undefined) => {
         if (err) {
           clearCookies(res);
+          console.log(2)
+
           return res.status(403).json({ errorCode: 'MW403', errorMessage: 'Invalid or expired refresh token. Please login again.' });
         }
         const decodedRefreshToken = decodedToken as IDecodedToken;
-        const user = await User.findById(decodedRefreshToken._id);
-        if (user.refreshToken !== refreshToken) {
+        const refreshTokenDB = await RefreshToken.findOne({ user: decodedRefreshToken._id }).populate('user');
+        const user = refreshTokenDB.user as IUser;
+        if (refreshTokenDB.token !== refreshToken) {
           clearCookies(res);
+          //delete refresh token from database
+          await RefreshToken.deleteMany({ user: user._id });
           return res.status(403).json({ errorCode: 'MW403', errorMessage: 'Invalid refresh token. Please login again.' });
         }
 
-        const newAccessToken = createJWT(user,'1m');
+        const newAccessToken = createJWT(user,secret.TTL_ACCESS_TOKEN);
         res.cookie('access_token', newAccessToken, { httpOnly: true, sameSite: 'lax' });
         req.payload = decodedRefreshToken;
         next();

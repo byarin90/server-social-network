@@ -108,7 +108,7 @@ const postCtrl = {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const comment = post.comments.find((comment) => comment == commentId);
+      const comment = post.comments.find((comment) => comment == commentId) as any;
       if (!comment) {
         return res.status(404).json({ message: "Comment not found" });
       }

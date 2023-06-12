@@ -1,8 +1,9 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { IUser } from './userModel';
 
 export interface IMessage extends Document {
-    sender: string;
-    receiver: string;
+    sender: string | IUser;
+    receiver: string |IUser;
     text: string;
 }
 

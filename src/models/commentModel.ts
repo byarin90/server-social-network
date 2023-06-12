@@ -1,10 +1,12 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { IUser } from './userModel';
+import { IPost } from './postModel';
 
 export interface IComment extends Document {
-    user: string;
-    post: string;
+    user: string |IUser;
+    post: string |IPost;
     text: string;
-    likes: string[];
+    likes: string[] | IUser[];
 }
 
 const CommentSchema: Schema = new Schema({

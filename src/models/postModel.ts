@@ -1,11 +1,13 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { IUser } from './userModel';
+import { IComment } from './commentModel';
 
 export interface IPost extends Document {
-    user: string;
+    user: string | IUser;
     text: string;
     image: string;
-    likes: string[];
-    comments: string[];
+    likes: string[] | IUser[];
+    comments: string[] | IComment[];
 }
 
 const PostSchema: Schema = new Schema({

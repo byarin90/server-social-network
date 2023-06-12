@@ -9,7 +9,6 @@ export interface IUser extends Document {
     profilePicture: string;
     bio: string;
     role: string;
-    refreshToken?: string;
     isActive: boolean;
     friends: string[];
     friendRequestsSent: string[];
@@ -25,11 +24,10 @@ const UserSchema: Schema = new Schema({
     profilePicture: { type: String },
     bio: { type: String },
     role: { type: String, default: 'user' },
-    refreshToken: { type: String, default: null },
     isActive: { type: Boolean, default: true },
     friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     friendRequestsSent: [{ type: Schema.Types.ObjectId, ref: 'Friendship' }],
     friendRequestsReceived: [{ type: Schema.Types.ObjectId, ref: 'Friendship' }],
 }, { timestamps: true });
-
+UserSchema.index({ username: 1, email: 1 }, { unique: true });
 export const User= mongoose.model<IUser>('User', UserSchema);
