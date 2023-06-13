@@ -2,18 +2,17 @@ import { Request, Response } from "express";
 import Post, { IPost } from "../models/postModel";
 import { postValidation } from "../validations/postValidation";
 import { z } from "zod";
-import { IComment } from "../models/commentModel";
+import Comment,{ IComment } from "../models/commentModel";
 
 const postCtrl = {
   getAllPosts: async (req: Request, res: Response) => {
     try {
       const posts = await Post.find()
         .populate("user", "firstName lastName profilePicture") // populate 'user' and select 'username' and 'profilePicture' fields
-        .sort({ createdAt: -1 });
-
+        .sort({ createdAt: -1 }).populate('comments');
       res.status(200).json(posts);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ error: error.message });
     }
   },
 
@@ -22,11 +21,11 @@ const postCtrl = {
       const posts = await Post.find({ user: req.params.userId })
         .sort({ createdAt: -1 })
         .populate("user", "firstName lastName profilePicture") // populate 'user' and select 'username' and 'profilePicture' fields
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 }).populate('comments');
 
       res.status(200).json(posts);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ error: error.message });
     }
   },
 
@@ -34,12 +33,14 @@ const postCtrl = {
     try {
       const post = await Post.findById(req.params.postId)
         .populate("user", "firstName lastName profilePicture") // populate 'user' and select 'username' and 'profilePicture' fields
-        .sort({ createdAt: -1 });
-      if (!post) return res.status(404).json({ message: "Post not found" });
+        .sort({ createdAt: -1 })
+        .populate('comments')
+        ;
+      if (!post) return res.status(404).json({ error: "Post not found" });
 
       return res.status(200).json(post);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ error: error.message });
     }
   },
 
@@ -89,12 +90,12 @@ const postCtrl = {
     try {
       const post = await Post.deleteOne({ _id: req.params.postId });
       if (post.deletedCount === 0) {
-        return res.status(404).json({ message: "Post not found" });
+        return res.status(404).json({ error: "Post not found" });
       } else if (post.deletedCount === 1) {
         return res.status(200).json({ message: "Post deleted" });
       }
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ error: error.message });
     }
   },
  

@@ -2,7 +2,6 @@ import express from "express";
 import { Request, Response, Router } from "express";
 import { authenticateUser } from "../middlewares/middleware";
 import postCtrl from "../controllers/postController";
-import commentCtrl from "../controllers/commentController";
 
 const router = express.Router() as Router;
 
@@ -29,9 +28,6 @@ router.put("/:postId", authenticateUser, postCtrl.updatePost);
 // Delete a post by ID (needs authentication)
 router.delete("/:postId", authenticateUser, postCtrl.deletePost);
 
-//? Comments routes
-// This route is for deleting a specific comment from a post that I created. You can delete any comment in a specific post by using the postId and commentId.
-router.delete("/myPost/:postId/:commentId", authenticateUser, commentCtrl.deleteOneCommentFromMyPost);
 
 
 export default router;
