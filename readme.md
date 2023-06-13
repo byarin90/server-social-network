@@ -253,3 +253,58 @@ The application consists of a set of API endpoints that allow interaction with t
 
 
 
+# Friendship Routes
+
+## Create Friendship Request
+
+- Route: `router.post("/friendship/request", authenticateUser, friendshipCtrl.createFriendshipRequest)`
+- Description: This route allows a user to send a friendship request to another user.
+- Middleware: `authenticateUser` to ensure the user is authenticated.
+
+## Accept Friendship Request
+
+- Route: `router.patch("/friendship/accept/:requestId", authenticateUser, friendshipCtrl.acceptFriendshipRequest)`
+- Description: This route allows a user to accept a pending friendship request.
+- Middleware: `authenticateUser` to ensure the user is authenticated.
+
+## Decline Friendship Request
+
+- Route: `router.patch("/friendship/decline/:requestId", authenticateUser, friendshipCtrl.declineFriendshipRequest)`
+- Description: This route allows a user to decline a pending friendship request.
+- Middleware: `authenticateUser` to ensure the user is authenticated.
+
+## Cancel Friendship Request
+
+- Route: `router.patch("/friendship/cancel/:requestId", authenticateUser, friendshipCtrl.cancelFriendshipRequest)`
+- Description: This route allows a user to cancel a sent friendship request.
+- Middleware: `authenticateUser` to ensure the user is authenticated.
+
+## Unfriend User
+
+- Route: `router.patch("/friendship/unfriend/:friendId", authenticateUser, friendshipCtrl.unfriendUser)`
+- Description: This route allows a user to unfriend another user.
+- Middleware: `authenticateUser` to ensure the user is authenticated.
+
+## Get Friends
+
+- Route: `router.get("/friendship/friends", authenticateUser, friendshipCtrl.getFriends)`
+- Description: This route retrieves the list of friends for the authenticated user.
+- Middleware: `authenticateUser` to ensure the user is authenticated.
+
+## Get Friendship Requests
+
+- Route: `router.get("/friendship/requests", authenticateUser, friendshipCtrl.getFriendshipRequests)`
+- Description: This route retrieves the list of pending friendship requests for the authenticated user.
+- Middleware: `authenticateUser` to ensure the user is authenticated.
+
+## Get Sent Friendship Requests
+
+- Route: `router.get("/friendship/requests/sent", authenticateUser, friendshipCtrl.getSentFriendshipRequests)`
+- Description: This route retrieves the list of sent friendship requests by the authenticated user.
+- Middleware: `authenticateUser` to ensure the user is authenticated.
+
+## Get Received Friendship Requests
+
+- Route: `router.get("/friendship/requests/received", authenticateUser, friendshipCtrl.getReceivedFriendshipRequests)`
+- Description: This route retrieves the list of received friendship requests by the authenticated user.
+- Middleware: `authenticateUser` to ensure the user is authenticated.
