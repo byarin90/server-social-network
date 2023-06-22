@@ -9,7 +9,7 @@ export const routesInit = (app:Express) => {
     app.use('/posts/comments',commentsRouter)
     app.use('/',indexRouter)
     app.use('/users',usersRouter)
-    app.use((req:Request, res:Response) => {
+    app.use((_:Request, res:Response) => {
         res.status(404).json({ msg_err: 'Not Found 404' })
     })
 }

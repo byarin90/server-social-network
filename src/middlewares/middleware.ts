@@ -53,7 +53,7 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
         const newAccessToken = createJWT(decodedRefreshToken, secret.TTL_ACCESS_TOKEN);
         const newRefreshToken=createJWT(decodedRefreshToken, secret.TTL_REFRESH_TOKEN);
         const {matchedCount,modifiedCount} = await RefreshToken.updateOne({ user: decodedRefreshToken._id,token:refreshToken}, { token: newRefreshToken });
-        if(matchedCount==0 && modifiedCount==0){
+        if(!matchedCount && !modifiedCount){
           console.log("Refresh token not found");
           clearCookies(res);
           return res.status(401).json({ message: "Unauthorized. Refresh token required.", errorCode: "MW401" });
