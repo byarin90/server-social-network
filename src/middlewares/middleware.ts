@@ -50,19 +50,17 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
       console.log("Access token expired");
       try {
         const decodedRefreshToken = jwt.verify(refreshToken, secret.JWT_SECRET) as IDecodedToken;
-        const refreshTokenDB = await RefreshToken.findOne({ user: decodedRefreshToken._id,token:refreshToken});
-        if (!refreshTokenDB) {
-          console.log("Refresh token not found in database");
+        const newAccessToken = createJWT(decodedRefreshToken, secret.TTL_ACCESS_TOKEN);
+        const newRefreshToken=createJWT(decodedRefreshToken, secret.TTL_REFRESH_TOKEN);
+        const {matchedCount,modifiedCount} = await RefreshToken.updateOne({ user: decodedRefreshToken._id,token:refreshToken}, { token: newRefreshToken });
+        if(matchedCount==0 && modifiedCount==0){
+          console.log("Refresh token not found");
           clearCookies(res);
           return res.status(401).json({ message: "Unauthorized. Refresh token required.", errorCode: "MW401" });
         }
-
-        const newAccessToken = createJWT(decodedRefreshToken, secret.TTL_ACCESS_TOKEN);
-        refreshTokenDB.token = createJWT(decodedRefreshToken, secret.TTL_REFRESH_TOKEN);
-        await refreshTokenDB.save();
-
+        
         res.cookie('access_token', newAccessToken, { httpOnly: true, sameSite: "strict" });
-        res.cookie('refresh_token', refreshTokenDB.token, { httpOnly: true, sameSite: "strict" });
+        res.cookie('refresh_token', newRefreshToken, { httpOnly: true, sameSite: "strict" });
 
         req.payload = decodedRefreshToken;
         console.log("Access token refreshed");
