@@ -50,7 +50,7 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
         if (err) {
           clearCookies(res);
 
-          return res.status(403).json({ errorCode: 'MW403', errorMessage: 'Invalid or expired refresh token. Please login again.' });
+          return res.status(401).json({ errorCode: 'MW401', errorMessage: 'Invalid or expired refresh token. Please login again.' });
         }
         const decodedRefreshToken = decodedToken as IDecodedToken;
         const refreshTokenDB = await RefreshToken.findOne({ user: decodedRefreshToken._id }).populate('user');
@@ -59,7 +59,7 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
           clearCookies(res);
           //delete refresh token from database
           await RefreshToken.deleteMany({ user: user._id });
-          return res.status(403).json({ errorCode: 'MW403', errorMessage: 'Invalid refresh token. Please login again.' });
+          return res.status(401).json({ errorCode: 'MW401', errorMessage: 'Invalid refresh token. Please login again.' });
         }
 
         const newAccessToken = createJWT(user,secret.TTL_ACCESS_TOKEN);
@@ -70,7 +70,7 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
     } else {
       // If the token is invalid, clear cookies and ask user to login again
       clearCookies(res);
-      return res.status(403).json({ errorCode: 'MW403', errorMessage: 'Invalid token. Please login again.' });
+      return res.status(401).json({ errorCode: 'MW401', errorMessage: 'Invalid token. Please login again.' });
     }
   }
 };
@@ -82,7 +82,7 @@ export const authenticateAdmin = async (req: Request, res: Response, next: NextF
       // Once the user is authenticated, check if the user is an admin
       if (req.payload?.role !== 'admin') {
         // If not an admin, return a Forbidden status
-        return res.status(403).json({ errorCode: 'MW403', errorMessage: 'Forbidden: Admin access only.' });
+        return res.status(401).json({ errorCode: 'MW403', errorMessage: 'Forbidden: Admin access only.' });
       }
       // If the user is an admin, continue to the next middleware
       next();

@@ -23,7 +23,7 @@ router.get("/:id", authenticateUser, userCtrl.getProfileById);
 
 //? Friendship Routes
 // Create Friendship Request
-//! router.post("/friendship/request", authenticateUser, friendshipCtrl.createFriendshipRequest);
+// ! router.post("/friendship/request", authenticateUser, friendshipCtrl.createFriendshipRequest);
 // This route allows a user to send a friendship request to another user.
 // Requires authentication (authenticateUser middleware).
 
