@@ -1,6 +1,6 @@
 import express from "express";
 import { Request, Response, Router } from "express";
-import { authenticateAdmin, authenticateUser } from "../middlewares/middleware";
+import {  authenticateUser } from "../middlewares/middleware";
 import authCtrl from "../controllers/authController";
 import userCtrl from "../controllers/userController";
 

@@ -16,7 +16,6 @@ export interface IRefreshToken extends Document {
   }, { timestamps: { createdAt: 'created_at' } });
   
   // TTL Index for RefreshToken
-  RefreshTokenSchema.index({ created_at: 1 }, { expireAfterSeconds: secret.TTL_REFRESH_TOKEN });
   
   export default mongoose.model<IRefreshToken>('RefreshToken', RefreshTokenSchema);
   

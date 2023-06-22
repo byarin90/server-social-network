@@ -84,11 +84,11 @@ const authCtrl = {
       // Send tokens in http-only cookies
       res.cookie("access_token", accessToken, {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "strict",
       });
       res.cookie("refresh_token", refreshToken, {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "strict",
       });
 
       // Send response
