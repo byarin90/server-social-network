@@ -1,9 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { secret } from '../configuration/secret';
-import { IUser } from "../models/userModel";
-import { createJWT } from "../utils/jwtUtil";
-import RefreshToken, { IRefreshToken } from '../models/refreshTokenModel';
+import { Request, Response, NextFunction } from "express";
+import jwt, { JsonWebTokenError } from "jsonwebtoken";
+import { secret } from "../configuration/secret";
+import { createJWT, saveAccessTokenOnCookie, saveRefreshTokenOnCookie } from "../utils/jwtUtil";
+import RefreshToken from "../models/refreshTokenModel";
+import { unauthorizedError } from "../constant/constant";
 
 export interface IDecodedToken {
   _id: string;
@@ -22,67 +22,90 @@ declare global {
 }
 
 const clearCookies = (res: Response) => {
-  res.clearCookie('access_token');
-  res.clearCookie('refresh_token');
-}
+  res.clearCookie("access_token");
+  res.clearCookie("refresh_token");
+};
 
-export const authenticateUser = async (req: Request, res: Response, next: NextFunction) => {
+export const authenticateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const accessToken = req.cookies.access_token;
   const refreshToken = req.cookies.refresh_token;
-  if(!accessToken){
-    console.log("No access token found");
+  if (!accessToken) {
     clearCookies(res);
-    return res.status(401).json({ message: "Unauthorized. Access token required.", errorCode: "MW401" });
+    return res
+      .status(401)
+      .json(unauthorizedError.accessToken);
   }
   try {
-    console.log("Verifying access token");
     const decoded = jwt.verify(accessToken, secret.JWT_SECRET) as IDecodedToken;
     req.payload = decoded;
     next();
   } catch (error) {
-    if(!refreshToken){
-      console.log("No refresh token found");
+    if (!refreshToken) {
       clearCookies(res);
-      return res.status(401).json({ message: "Unauthorized. Refresh token required.", errorCode: "MW401" });
+      return res
+        .status(401)
+        .json(unauthorizedError.refreshToken);
     }
 
-    if (error instanceof jwt.TokenExpiredError) {
-      console.log("Access token expired");
+    if (error instanceof jwt.TokenExpiredError || error instanceof JsonWebTokenError) {
       try {
-        const decodedRefreshToken = jwt.verify(refreshToken, secret.JWT_SECRET) as IDecodedToken;
-        const newAccessToken = createJWT(decodedRefreshToken, secret.TTL_ACCESS_TOKEN);
-        const newRefreshToken=createJWT(decodedRefreshToken, secret.TTL_REFRESH_TOKEN);
-        const {matchedCount,modifiedCount} = await RefreshToken.updateOne({ user: decodedRefreshToken._id,token:refreshToken}, { token: newRefreshToken });
-        if(!matchedCount && !modifiedCount){
-          console.log("Refresh token not found");
+        const decodedRefreshToken = jwt.verify(
+          refreshToken,
+          secret.JWT_SECRET
+        ) as IDecodedToken;
+        const newAccessToken = createJWT(
+          decodedRefreshToken,
+          secret.TTL_ACCESS_TOKEN
+        );
+        const newRefreshToken = createJWT(
+          decodedRefreshToken,
+          secret.TTL_REFRESH_TOKEN
+        );
+        const { matchedCount, modifiedCount } = await RefreshToken.updateOne(
+          { user: decodedRefreshToken._id, token: refreshToken },
+          { token: newRefreshToken }
+        );
+        if (!matchedCount && !modifiedCount) {
           clearCookies(res);
-          return res.status(401).json({ message: "Unauthorized. Refresh token required.", errorCode: "MW401" });
+          return res
+            .status(401)
+            .json(unauthorizedError.refreshToken);
         }
-        
-        res.cookie('access_token', newAccessToken, { httpOnly: true, sameSite: "strict" });
-        res.cookie('refresh_token', newRefreshToken, { httpOnly: true, sameSite: "strict" });
+
+        saveAccessTokenOnCookie(res, newAccessToken);
+        saveRefreshTokenOnCookie(res, newRefreshToken);
 
         req.payload = decodedRefreshToken;
-        console.log("Access token refreshed");
         next();
-
       } catch (error) {
-        if (error instanceof jwt.TokenExpiredError) {
-          console.log("Refresh token expired");
+        if (error instanceof jwt.TokenExpiredError || error instanceof JsonWebTokenError) {
           clearCookies(res);
-          return res.status(401).json({ message: "Unauthorized. Refresh token required.", errorCode: "MW401" });
+          return res
+            .status(401)
+            .json(unauthorizedError.refreshToken);
         }
         console.error(error);
-        return res.status(500).json({ message: "Internal Server Error", errorCode: "MW500" });
+        return res
+          .status(500)
+          .json(unauthorizedError.internalServerError);
       }
     }
   }
-}
+};
 
-
-export const authAdmin=async ({payload:{role}}: Request, res: Response, next: NextFunction) =>{
-if(role=='admin'){
-   return next();
-}
-  res.status(403).json({ message: 'Forbidden. You are not allowed to access this endpoint.', errorCode: "MW403" });
-}
+export const authAdmin = async (
+  { payload: { role } }: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (role === "admin") {
+    return next();
+  }
+  res
+    .status(403)
+    .json(unauthorizedError.forbidden);
+};

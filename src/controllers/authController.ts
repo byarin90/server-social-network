@@ -3,7 +3,7 @@ import { IUser, User } from "../models/userModel";
 import { userValidation } from "../validations/userValidations";
 import { z } from "zod";
 import bcrypt from "bcrypt";
-import { createJWT } from "../utils/jwtUtil";
+import { createJWT, saveAccessTokenOnCookie, saveRefreshTokenOnCookie } from "../utils/jwtUtil";
 import { secret } from "../configuration/secret";
 import RefreshToken from "../models/refreshTokenModel";
 const authCtrl = {
@@ -82,14 +82,10 @@ const authCtrl = {
       });
       await newRefreshToken.save();
       // Send tokens in http-only cookies
-      res.cookie("access_token", accessToken, {
-        httpOnly: true,
-        sameSite: "strict",
-      });
-      res.cookie("refresh_token", refreshToken, {
-        httpOnly: true,
-        sameSite: "strict",
-      });
+
+      saveAccessTokenOnCookie(res,accessToken);
+      saveRefreshTokenOnCookie(res,refreshToken);
+     
 
       // Send response
       res.status(200).json({ message: "Logged in successfully" });
