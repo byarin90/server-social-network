@@ -24,6 +24,9 @@ const saveAccessTokenOnCookie = async (res:Response,accessToken: string) => {
         sameSite: "strict",
       });
 }
+const clearTokensFromCookies = (res: Response) => {
+    res.clearCookie(authConstant.REFRESH_TOKEN_COOKIE);
+    res.clearCookie(authConstant.ACCESS_TOKEN_COOKIE);
+  };
 
-
-export {createJWT,saveRefreshTokenOnCookie,saveAccessTokenOnCookie};
+export {createJWT,saveRefreshTokenOnCookie,saveAccessTokenOnCookie,clearTokensFromCookies};

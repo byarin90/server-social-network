@@ -2,26 +2,36 @@ import { Request, Response } from "express";
 import Post, { IPost } from "../models/postModel";
 import { postValidation } from "../validations/postValidation";
 import { z } from "zod";
-import Comment,{ IComment } from "../models/commentModel";
 
 const postCtrl = {
   getAllPosts: async (req: Request, res: Response) => {
     try {
       const posts = await Post.find()
-        .populate("user", "firstName lastName profilePicture") // populate 'user' and select 'username' and 'profilePicture' fields
-        .sort({ createdAt: -1 }).populate('comments');
+        .populate({
+          path: "user",
+          select: "firstName lastName profilePicture",
+        })
+        .populate({
+          path: "comments",
+          populate: {
+            path: "user",
+            select: "firstName lastName profilePicture",
+          },
+        })
+        .sort({ createdAt: -1 });
       res.status(200).json(posts);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  },
+},
 
   getUserPosts: async (req: Request, res: Response) => {
     try {
       const posts = await Post.find({ user: req.params.userId })
         .sort({ createdAt: -1 })
         .populate("user", "firstName lastName profilePicture") // populate 'user' and select 'username' and 'profilePicture' fields
-        .sort({ createdAt: -1 }).populate('comments');
+        .sort({ createdAt: -1 })
+        .populate("comments");
 
       res.status(200).json(posts);
     } catch (error) {
@@ -34,8 +44,7 @@ const postCtrl = {
       const post = await Post.findById(req.params.postId)
         .populate("user", "firstName lastName profilePicture") // populate 'user' and select 'username' and 'profilePicture' fields
         .sort({ createdAt: -1 })
-        .populate('comments')
-        ;
+        .populate("comments");
       if (!post) return res.status(404).json({ error: "Post not found" });
 
       return res.status(200).json(post);
@@ -74,6 +83,7 @@ const postCtrl = {
         validatedRequestBody,
         { new: true }
       );
+      if (!post) return res.status(404).json({ error: "Post not found" });
       res.json(post).status(200);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -98,7 +108,6 @@ const postCtrl = {
       res.status(500).json({ error: error.message });
     }
   },
- 
 };
 
 export default postCtrl;

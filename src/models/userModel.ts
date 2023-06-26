@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { dateNow } from '../utils/date';
 
 export interface IUser extends Document {
     firstName: string;
@@ -13,7 +14,7 @@ export interface IUser extends Document {
     friends: string[];
     friendRequestsSent: string[];
     friendRequestsReceived: string[];
-}
+};
 
 const UserSchema: Schema = new Schema({
     firstName: { type: String, required: true },
@@ -28,7 +29,9 @@ const UserSchema: Schema = new Schema({
     friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     friendRequestsSent: [{ type: Schema.Types.ObjectId, ref: 'Friendship' }],
     friendRequestsReceived: [{ type: Schema.Types.ObjectId, ref: 'Friendship' }],
-}, { timestamps: true });
+    created_at: { type: Date, default: dateNow() },
+    updated_at: { type: Date, default: dateNow() }
+});
 
 UserSchema.index({ username: 1, email: 1 }, { unique: true });
 export const User= mongoose.model<IUser>('User', UserSchema);

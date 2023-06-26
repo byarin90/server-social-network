@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IUser } from './userModel';
+import { dateNow } from '../utils/date';
 
 export interface IFriendship extends Document {
     sender: string | IUser;
@@ -17,7 +18,9 @@ const FriendshipSchema: Schema = new Schema({
         default: 'pending',
         required: true 
     },
-    timestamp: { type: Date, default: Date.now },
+    created_at: { type: Date, default: dateNow() },
+    updated_at: { type: Date, default: dateNow() }
+
 });
 
 export default mongoose.model<IFriendship>('Friendship', FriendshipSchema);

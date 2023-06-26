@@ -3,9 +3,10 @@ import { IUser, User } from "../models/userModel";
 import { userValidation } from "../validations/userValidations";
 import { z } from "zod";
 import bcrypt from "bcrypt";
-import { createJWT, saveAccessTokenOnCookie, saveRefreshTokenOnCookie } from "../utils/jwtUtil";
+import { clearTokensFromCookies, createJWT, saveAccessTokenOnCookie, saveRefreshTokenOnCookie } from "../utils/jwtUtil";
 import { secret } from "../configuration/secret";
 import RefreshToken from "../models/refreshTokenModel";
+
 const authCtrl = {
   signUp: async (req: Request, res: Response) => {
     try {
@@ -101,8 +102,7 @@ const authCtrl = {
   },
   logout: async(req: Request, res: Response) => {
     // Clear the token cookie
-    res.clearCookie("access_token");
-    res.clearCookie("refresh_token");
+    clearTokensFromCookies(res);
    const id = req.payload._id;
     // Delete the refresh token from the database
     await RefreshToken.deleteMany({ user: id });

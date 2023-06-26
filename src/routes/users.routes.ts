@@ -3,6 +3,7 @@ import { Request, Response, Router } from "express";
 import {  authenticateUser } from "../middlewares/middleware";
 import authCtrl from "../controllers/authController";
 import userCtrl from "../controllers/userController";
+import { friendshipCtrl } from "../controllers/friendshipController";
 
 const router = express.Router() as Router;
 
@@ -23,12 +24,24 @@ router.get("/:id", authenticateUser, userCtrl.getProfileById);
 
 //? Friendship Routes
 // Create Friendship Request
-// ! router.post("/friendship/request", authenticateUser, friendshipCtrl.createFriendshipRequest);
+ router.post("/friendship/request/:id", authenticateUser, friendshipCtrl.createFriendshipRequest);
 // This route allows a user to send a friendship request to another user.
 // Requires authentication (authenticateUser middleware).
 
+
+// Get Sent Friendship Requests
+ router.get("/friendship/requests/sent", authenticateUser, friendshipCtrl.getSentFriendshipRequests);
+// This route retrieves the list of sent friendship requests by the authenticated user.
+// Requires authentication (authenticateUser middleware).
+
+
+// Get Friendship Requests
+ router.get("/friendship/requests", authenticateUser, friendshipCtrl.getReceivedFriendshipRequests);
+// This route retrieves the list of pending friendship requests for the authenticated user.
+// Requires authentication (authenticateUser middleware).
+
 // Accept Friendship Request
-//! router.patch("/friendship/accept/:requestId", authenticateUser, friendshipCtrl.acceptFriendshipRequest);
+ router.patch("/friendship/accept/:id", authenticateUser, friendshipCtrl.acceptFriendshipRequest);
 // This route allows a user to accept a pending friendship request.
 // Requires authentication (authenticateUser middleware).
 
@@ -52,15 +65,8 @@ router.get("/:id", authenticateUser, userCtrl.getProfileById);
 // This route retrieves the list of friends for the authenticated user.
 // Requires authentication (authenticateUser middleware).
 
-// Get Friendship Requests
-//! router.get("/friendship/requests", authenticateUser, friendshipCtrl.getFriendshipRequests);
-// This route retrieves the list of pending friendship requests for the authenticated user.
-// Requires authentication (authenticateUser middleware).
 
-// Get Sent Friendship Requests
-//! router.get("/friendship/requests/sent", authenticateUser, friendshipCtrl.getSentFriendshipRequests);
-// This route retrieves the list of sent friendship requests by the authenticated user.
-// Requires authentication (authenticateUser middleware).
+
 
 // // Get Received Friendship Requests
 // router.get("/friendship/requests/received", authenticateUser, friendshipCtrl.getReceivedFriendshipRequests);
