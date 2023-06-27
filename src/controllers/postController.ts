@@ -2,28 +2,46 @@ import { Request, Response } from "express";
 import Post, { IPost } from "../models/postModel";
 import { postValidation } from "../validations/postValidation";
 import { z } from "zod";
+import { User } from "../models/userModel";
 
 const postCtrl = {
-  getAllPosts: async (req: Request, res: Response) => {
+  getFriendsPosts: async (req: Request, res: Response) => {
+    // Get the user id from the request payload
+    const { _id } = req.payload;
+  
     try {
-      const posts = await Post.find()
-        .populate({
+      // Fetch the user's User document
+      const user = await User.findById(_id);
+  
+      // Extract the list of friend IDs and include the user's own id
+      const friendsIds = [...user.friends, _id];
+  
+      // Find posts created by the user or any of their friends
+      const posts = await Post.find({
+        user: { $in: friendsIds }
+      })
+      .populate({
+        path: "user",
+        select: "firstName lastName profilePicture",
+      })
+      .populate({
+        path: "comments",
+        populate: {
           path: "user",
           select: "firstName lastName profilePicture",
-        })
-        .populate({
-          path: "comments",
-          populate: {
-            path: "user",
-            select: "firstName lastName profilePicture",
-          },
-        })
-        .sort({ createdAt: -1 });
+        },
+      })
+      .sort({ createdAt: -1 });
+      
+      if (!posts.length) {
+        return res.status(400).json({ error: "No posts found" });
+      }
       res.status(200).json(posts);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-},
+  }
+  ,
 
   getUserPosts: async (req: Request, res: Response) => {
     try {

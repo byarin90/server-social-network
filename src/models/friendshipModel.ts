@@ -5,7 +5,7 @@ import { dateNow } from '../utils/date';
 export interface IFriendship extends Document {
     sender: string | IUser;
     receiver: string | IUser;
-    status:'pending' | 'accepted' | 'declined' ;
+    status:'pending' | 'accepted' | 'declined'| 'blocked' ;
     timestamp: Date;
 }
 
@@ -14,7 +14,7 @@ const FriendshipSchema: Schema = new Schema({
     receiver: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     status: { 
         type: String, 
-        enum: ['pending', 'accepted', 'declined'], 
+        enum: ['pending', 'accepted', 'declined','blocked'], 
         default: 'pending',
         required: true 
     },

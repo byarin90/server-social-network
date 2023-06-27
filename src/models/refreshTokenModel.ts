@@ -1,6 +1,5 @@
 // RefreshToken Interface
 import mongoose, { Schema, Document } from 'mongoose';
-import { secret } from '../configuration/secret';
 import { IUser } from './userModel';
 import { dateNow } from '../utils/date';
 
@@ -15,7 +14,6 @@ export interface IRefreshToken extends Document {
     token: { type: String, required: true },
     created_at: { type: Date, default: dateNow() },
     updated_at: { type: Date, default: dateNow() }
-
   });
   
   // TTL Index for RefreshToken

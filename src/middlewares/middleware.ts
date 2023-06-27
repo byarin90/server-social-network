@@ -126,3 +126,4 @@ export const authAdmin = async (
     .status(403)
     .json(unauthorizedError.forbidden);
 };
+

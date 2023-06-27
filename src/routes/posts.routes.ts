@@ -11,7 +11,7 @@ router.get("/", (req: Request, res: Response) => {
 
 //? Posts routes
 // List all posts (you might want to add pagination here in the future)
-router.get("/all",authenticateUser,postCtrl.getAllPosts);
+router.get("/friends",authenticateUser,postCtrl.getFriendsPosts);
 
 // List all posts from a specific user
 router.get("/user/:userId",authenticateUser, postCtrl.getUserPosts);
