@@ -1,10 +1,10 @@
 // Imports necessary for middleware functionality
 import { Request, Response, NextFunction } from "express";
 import jwt, { JsonWebTokenError } from "jsonwebtoken";
-import { secret } from "../configuration/secret";
+import { SECRET } from "../configuration/secret";
 import { clearTokensFromCookies, createJWT, saveAccessTokenOnCookie, saveRefreshTokenOnCookie } from "../utils/jwtUtil";
 import RefreshToken from "../models/refreshTokenModel";
-import { unauthorizedError } from "../constant/constant";
+import { unauthorizedError } from "../lib/error-handling";
 
 //? This is a type definition for the payload of the JWT
 export interface IDecodedToken {
@@ -45,7 +45,7 @@ export const authenticateUser = async (
 
   try {
     //! Verify the access token, if it's valid then assign the decoded payload to the request object and call next
-    const decoded = jwt.verify(accessToken, secret.JWT_SECRET) as IDecodedToken;
+    const decoded = jwt.verify(accessToken, SECRET.JWT_SECRET) as IDecodedToken;
     req.payload = decoded;
     next();
   } catch (error) {
@@ -63,15 +63,15 @@ export const authenticateUser = async (
         //TODO: Verify the refresh token, and if it's valid create new access and refresh tokens
         const decodedRefreshToken = jwt.verify(
           refreshToken,
-          secret.JWT_SECRET
+          SECRET.JWT_SECRET
         ) as IDecodedToken;
         const newAccessToken = createJWT(
           decodedRefreshToken,
-          secret.TTL_ACCESS_TOKEN
+          SECRET.TTL_ACCESS_TOKEN
         );
         const newRefreshToken = createJWT(
           decodedRefreshToken,
-          secret.TTL_REFRESH_TOKEN
+          SECRET.TTL_REFRESH_TOKEN
         );
 
         //TODO: Update the stored refresh token in the database, if it's not found or can't be updated then clear cookies and respond with a 401 Unauthorized error

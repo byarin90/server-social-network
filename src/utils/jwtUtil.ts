@@ -1,12 +1,12 @@
 import jwt from 'jsonwebtoken';
 import { IUser } from "../models/userModel";
-import { secret } from '../configuration/secret';
+import { SECRET } from '../configuration/secret';
 import { IDecodedToken } from '../middlewares/middleware';
 import { Response } from 'express';
 import { authConstant } from '../constant/constant';
 
  const createJWT = ({_id,username,role}: IUser|IDecodedToken,expiresIn:number) => {    
-    const token = jwt.sign({_id,username,role}, secret.JWT_SECRET, { expiresIn:(expiresIn+'s')});
+    const token = jwt.sign({_id,username,role}, SECRET.JWT_SECRET, { expiresIn:(expiresIn+'s')});
     return token;
 };
 

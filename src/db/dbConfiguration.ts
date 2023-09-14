@@ -1,10 +1,9 @@
 import mongoose from 'mongoose';
+import { SECRET } from '../configuration/secret';
 
 export async function connectDB() {
-    const uri = process.env.DB_URI as string; // Get your DB URI from an environment variable
-
     try {
-       await mongoose.connect(uri);
+       await mongoose.connect(SECRET.DB_URI);
       
         console.log("Connected successfully to database");
     } catch (error) {

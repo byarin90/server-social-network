@@ -4,7 +4,7 @@ import { userValidation } from "../validations/userValidations";
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import { clearTokensFromCookies, createJWT, saveAccessTokenOnCookie, saveRefreshTokenOnCookie } from "../utils/jwtUtil";
-import { secret } from "../configuration/secret";
+import { SECRET } from "../configuration/secret";
 import RefreshToken from "../models/refreshTokenModel";
 
 const authCtrl = {
@@ -72,8 +72,8 @@ const authCtrl = {
       }
 
       // Create a JWT token
-      const accessToken = createJWT(user,secret.TTL_ACCESS_TOKEN);
-      const refreshToken = createJWT(user,secret.TTL_REFRESH_TOKEN);
+      const accessToken = createJWT(user,SECRET.TTL_ACCESS_TOKEN);
+      const refreshToken = createJWT(user,SECRET.TTL_REFRESH_TOKEN);
       //if user was logged in before, delete the refresh token from the database
       await RefreshToken.deleteMany({ user: user._id });
       // Save the refresh token in the database
