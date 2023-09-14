@@ -1,9 +1,9 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express } from 'express';
 import dotenv from 'dotenv';
 import { connectDB } from './db/dbConfiguration';
 import { routesInit } from './routes/config.routes';
 import cookieParser from 'cookie-parser';
-import { secret } from './configuration/secret';
+import { SECRET } from './configuration/secret';
 import cors from 'cors';
 
 
@@ -13,7 +13,7 @@ dotenv.config();
 const app: Express = express();
 app.use(express.json());
 app.use(cookieParser());
-const port = secret.PORT;
+const port = SECRET.PORT;
 connectDB();
 routesInit(app);
 
