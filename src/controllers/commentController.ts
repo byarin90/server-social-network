@@ -1,171 +1,175 @@
-import { Request, Response } from "express";
-import Comment from "../models/commentModel";
-import { IComment } from "../models/commentModel";
-import Post, { IPost } from "../models/postModel";
-import { postValidation } from "../validations/postValidation";
-import { z } from "zod";
-
+import { Request, Response } from 'express'
+import { postValidation } from '../validations/postValidation'
+import { z } from 'zod'
+import { IDecodedToken } from '../lib/@types/express/index'
+import { IComment, IPost } from '../lib/@types/db'
+import Post from '../models/postModel'
+import Comment from '../models/commentModel'
 const commentCtrl = {
-    // Function to create a comment for a specific post
-    createComment: async (req: Request, res: Response) => {
-        const {postId} = req.params; // Get post ID from parameters
-        const { _id } = req.payload; // Get user ID from request payload
+  // Function to create a comment for a specific post
+  createComment: async (req: Request, res: Response) => {
+    const { postId } = req.params // Get post ID from parameters
 
-        try {
-          // Validate request body using postValidation
-          const validatation: IComment = postValidation.commentValidation(req.body)
+    const { _id } = req.payload as IDecodedToken // Get user ID from request payload
 
-          // Find the post by ID
-          const post = await Post.findById(postId) as IPost & { comments: string[] };
-          if (!post) {
-            return res.status(404).json({ error: "Post not found" });
-          }
+    try {
+      // Validate request body using postValidation
+      const validatation: IComment = postValidation.commentValidation(req.body)
 
-          // Create a new comment with the validated data
-          const comment = new Comment(validatation);
-          comment.user = _id; // Assign user ID to comment
-          comment.post = postId as string; // Assign post ID to comment
-          await comment.save(); // Save comment
+      // Find the post by ID
+      const post = await Post.findById(postId) as IPost & { comments: string[] }
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' })
+      }
 
-          post.comments.push(comment._id); // Push the comment ID into the post's comments
-          await post.save(); // Save post
+      // Create a new comment with the validated data
+      const comment = new Comment(validatation)
+      comment.user = _id // Assign user ID to comment
+      comment.post = postId // Assign post ID to comment
+      await comment.save() // Save comment
 
-          // Return the saved comment
-          res.json(comment).status(201);
-        }catch (error) {
-          // Check if the error is an instance of ZodError
-          if(error instanceof z.ZodError) {
-            return res.status(400).send({error: error.errors});
-          }
+      post.comments.push(comment._id) // Push the comment ID into the post's comments
+      await post.save() // Save post
 
-          // If not, return the error message
-          res.status(500).json({ error: error.message });
-        }
-    },
+      // Return the saved comment
+      res.json(comment).status(201)
+    } catch (error: any) {
+      // Check if the error is an instance of ZodError
+      if (error instanceof z.ZodError) {
+        return res.status(400).send({ error: error.errors })
+      }
 
-    // Function to update a comment
-    updateComment: async (req: Request, res: Response) => {
-        const {commentId} = req.params; // Get comment ID from parameters
-        const { _id } = req.payload; // Get user ID from request payload
+      // If not, return the error message
+      res.status(500).json({ error: error.message })
+    }
+  },
 
-        try{
-          // Find comment by ID
-          const comment = await Comment.findOne({_id: commentId});
-          
-          // Validate request body using postValidation
-          const validatation: IComment = postValidation.commentValidation(req.body)
+  // Function to update a comment
+  updateComment: async (req: Request, res: Response) => {
+    const { commentId } = req.params // Get comment ID from parameters
+    const { _id } = req.payload as IDecodedToken // Get user ID from request payload
 
-          // Check if the user is authorized to update the comment
-          if(comment.user != _id) {
-            return res.status(401).json({error: "Unauthorized"});
-          }
+    try {
+      // Find comment by ID
+      const comment = await Comment.findOne({ _id: commentId })
 
-          // Update the comment with the validated data
-          const updateComment = await Comment.updateOne({_id: commentId}, validatation);
-          
-          // Check if the comment was found, not modified or updated
-          if(updateComment.matchedCount == 0) {
-            return res.status(404).json({error: "Comment not found"});
-          } else if(updateComment.modifiedCount == 0) {
-            return res.status(304).json({error: "Comment not modified"});
-          } else if(updateComment.modifiedCount == 1) {
-            return res.status(200).json({message: "Comment updated"});
-          }
+      // Validate request body using postValidation
+      const validatation: IComment = postValidation.commentValidation(req.body)
 
-        } catch(error) {
-          // Check if the error is an instance of ZodError
-          if(error instanceof z.ZodError) {
-            return res.status(400).send({error: error.errors});
-          }
+      if (!comment) {
+        return res.status(404).json({ error: 'Comment not found' })
+      }
 
-          // If not, return the error message
-          res.status(500).json({ error: error.message });
-        }
-    },
+      // Check if the user is authorized to update the comment
+      if (comment.user !== _id) {
+        return res.status(401).json({ error: 'Unauthorized' })
+      }
 
-    // Function to delete a comment
-    deleteComment: async (req: Request, res: Response) => {
-        const {commentId} = req.params; // Get comment ID from parameters
-        const {postId} = req.query; // Get post ID from query
-        const { _id } = req.payload; // Get user ID from request payload
+      // Update the comment with the validated data
+      const updateComment = await Comment.updateOne({ _id: commentId }, validatation)
 
-        // Check if postId is provided in the query
-        if(!postId) {
-          return res.status(400).json({error: "postId is required"});
-        }
+      // Check if the comment was found, not modified or updated
+      if (updateComment.matchedCount === 0) {
+        return res.status(404).json({ error: 'Comment not found' })
+      } else if (updateComment.modifiedCount === 0) {
+        return res.status(304).json({ error: 'Comment not modified' })
+      } else if (updateComment.modifiedCount === 1) {
+        return res.status(200).json({ message: 'Comment updated' })
+      }
+    } catch (error: any) {
+      // Check if the error is an instance of ZodError
+      if (error instanceof z.ZodError) {
+        return res.status(400).send({ error: error.errors })
+      }
 
-        try {
-          // Find the post by ID
-          const post = await Post.findById(postId as string) as IPost & { comments: string[] };
-          if (!post) {
-            return res.status(404).json({ error: "Post not found" });
-          }
+      // If not, return the error message
+      res.status(500).json({ error: error.message })
+    }
+  },
 
-          // Find comment by ID
-          const comment = await Comment.findById(commentId);
-          if(!comment) {
-            return res.status(404).json({error: "Comment not found"});
-          }
+  // Function to delete a comment
+  deleteComment: async (req: Request, res: Response) => {
+    const { commentId } = req.params // Get comment ID from parameters
+    const { postId } = req.query // Get post ID from query
+    const { _id } = req.payload as IDecodedToken // Get user ID from request payload
 
-          // Check if the user is authorized to delete the comment
-          if(comment.user != _id) {
-            return res.status(401).json({error: "Unauthorized"});
-          }
+    // Check if postId is provided in the query
+    if (!postId) {
+      return res.status(400).json({ error: 'postId is required' })
+    }
 
-          // Filter the post's comments to remove the deleted comment
-          post.comments = post.comments.filter((comment:string) => comment != commentId);
-          await post.save(); // Save post
+    try {
+      // Find the post by ID
+      const post = await Post.findById(postId as string) as IPost & { comments: string[] }
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' })
+      }
 
-          // Delete comment
-          await comment.deleteOne();
+      // Find comment by ID
+      const comment = await Comment.findById(commentId)
 
-          // Return success message
-          res.status(200).json({message: "Comment deleted"});
+      if (!comment) {
+        return res.status(404).json({ error: 'Comment not found' })
+      }
 
-        } catch(error) {
-          // Return the error message
-          res.status(500).json({ error: error.message });
-        }
-    },
+      // Check if the user is authorized to delete the comment
+      if (comment.user !== _id) {
+        return res.status(401).json({ error: 'Unauthorized' })
+      }
 
-    // Function to delete a comment from user's own post
-    deleteOneCommentFromMyPost: async (req: Request, res: Response) => {
-        const { postId, commentId } = req.params; // Get post ID and comment ID from parameters
-        const { _id } = req.payload; // Get user ID from request payload
+      // Filter the post's comments to remove the deleted comment
+      post.comments = post.comments.filter((comment: string) => comment !== commentId)
+      await post.save() // Save post
 
-        try {
-          // Find the post by ID
-          const post = await Post.findById(postId) as IPost & { comments: string[] };
-          if (!post) {
-            return res.status(404).json({ error: "Post not found" });
-          }
-          
-          // Check if the user is authorized to delete the comment
-          if (post.user != _id) {
-            return res.status(401).json({ error: "Unauthorized" });
-          }
+      // Delete comment
+      await comment.deleteOne()
 
-          // Filter the post's comments to remove the deleted comment
-          post.comments = post.comments.filter((comment:string) => comment != commentId);
-          await post.save(); // Save post
+      // Return success message
+      res.status(200).json({ message: 'Comment deleted' })
+    } catch (error: any) {
+      // Return the error message
+      res.status(500).json({ error: error.message })
+    }
+  },
 
-          // Delete comment
-          const comment = await Comment.deleteOne({_id:commentId});
+  // Function to delete a comment from user's own post
+  deleteOneCommentFromMyPost: async (req: Request, res: Response) => {
+    const { postId, commentId } = req.params // Get post ID and comment ID from parameters
+    const { _id } = req.payload as IDecodedToken // Get user ID from request payload
 
-          // Check if the comment was found and deleted
-          if (comment.deletedCount == 0) {
-            return res.status(404).json({ error: "Comment not found" });
-          } else if (comment.deletedCount == 1) {
-            return res.status(200).json({ message: "Comment deleted" });
-          }
+    try {
+      // Find the post by ID
+      const post = await Post.findById(postId) as IPost & { comments: string[] }
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' })
+      }
 
-          // Return success status
-          res.status(200).json({status: "ok"});
-        } catch (error) {
-          // Return the error message
-          res.status(500).json({ error: error.message });
-        }
-    },
+      // Check if the user is authorized to delete the comment
+      if (post.user !== _id) {
+        return res.status(401).json({ error: 'Unauthorized' })
+      }
+
+      // Filter the post's comments to remove the deleted comment
+      post.comments = post.comments.filter((comment: string) => comment !== commentId)
+      await post.save() // Save post
+
+      // Delete comment
+      const comment = await Comment.deleteOne({ _id: commentId })
+
+      // Check if the comment was found and deleted
+      if (comment.deletedCount === 0) {
+        return res.status(404).json({ error: 'Comment not found' })
+      } else if (comment.deletedCount === 1) {
+        return res.status(200).json({ message: 'Comment deleted' })
+      }
+
+      // Return success status
+      res.status(200).json({ status: 'ok' })
+    } catch (error: any) {
+      // Return the error message
+      res.status(500).json({ error: error.message })
+    }
+  }
 }
 
-export default commentCtrl;
+export default commentCtrl

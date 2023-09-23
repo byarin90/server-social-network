@@ -1,6 +1,5 @@
-import { IComment } from "../models/commentModel";
-import { IPost } from "../models/postModel";
-import { z } from 'zod';
+import { z } from 'zod'
+import { IComment, IPost } from '../lib/@types/db'
 
 export const postValidation = {
   CreatePostSchema: (bodyData: IPost) => {
@@ -8,15 +7,15 @@ export const postValidation = {
       text: z.string(),
       image: z.string().optional(),
       videoLink: z.string().optional()
-    })  as z.ZodSchema<any>;;
+    }) as z.ZodSchema<any>
 
-    return schema.parse(bodyData);
+    return schema.parse(bodyData)
   },
   commentValidation: (bodyData: IComment) => {
     const schema = z.object({
-      text: z.string(),
-    })  as z.ZodSchema<any>;;
+      text: z.string()
+    }) as z.ZodSchema<any>
 
-    return schema.parse(bodyData);
+    return schema.parse(bodyData)
   }
-};
+}
