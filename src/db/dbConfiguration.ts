@@ -1,12 +1,13 @@
 import mongoose from 'mongoose'
 import { SECRET } from '../constant/constant'
+import logger from '../lib/logger'
 
 export const connectDB = async (): Promise<void> => {
   try {
     await mongoose.connect(SECRET.DB_URI)
 
-    console.log('Connected successfully to database')
+    logger.debug('Connected successfully to MongoDB')
   } catch (error) {
-    console.error('Error connecting to database: ', error)
+    logger.error('Error connecting to database: ', error)
   }
 }

@@ -15,6 +15,7 @@ const UserSchema: Schema = new Schema({
   friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   friendRequestsSent: [{ type: Schema.Types.ObjectId, ref: 'Friendship' }],
   friendRequestsReceived: [{ type: Schema.Types.ObjectId, ref: 'Friendship' }],
+  isOnline: { type: Boolean, default: false },
   created_at: { type: Date, default: dateNow() },
   updated_at: { type: Date, default: dateNow() }
 })

@@ -5,30 +5,32 @@ class Logger {
   private static formatMessage (level: string, message: string, object?: any): string {
     let formattedMessage = `${level}: ${message}`
     if (object) {
-      formattedMessage += ` ${JSON.stringify(object)}`
+      formattedMessage += `\n${chalk.gray(JSON.stringify(object))}`
     }
-    return formattedMessage
+    return formattedMessage + '\n'
   }
 
   public static warning (message: string, object?: any): void {
-    const level = chalk.bold.yellow('WARNING')
-    console.log(this.formatMessage(level, message, object))
+    const level = chalk.yellow('WARNING')
+    console.log(this.formatMessage(level, chalk.gray(message), object))
   }
 
   public static debug (message: string, object?: any): void {
-    const level = chalk.bold.blue('DEBUG')
-    console.log(this.formatMessage(level, chalk.blue(message), object))
+    const level = chalk.blue('DEBUG')
+    console.log(this.formatMessage(level, chalk.gray(message), object))
   }
 
   public static info (message: string, object?: any): void {
-    const level = chalk.bold.green('INFO')
-    console.log(this.formatMessage(level, message, object))
+    const level = chalk.green('INFO')
+    console.log(this.formatMessage(level, chalk.gray(message), object))
   }
 
   public static error (message: string, object?: any): void {
-    const level = chalk.bold.red('ERROR')
-    console.log(this.formatMessage(level, message, object))
+    const level = chalk.red('ERROR')
+    console.log(this.formatMessage(level, chalk.gray(message), object))
   }
 }
 
-export default Logger
+const logger = Logger
+
+export default logger
