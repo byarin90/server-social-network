@@ -18,14 +18,14 @@ const bootstrap = async (): Promise<void> => {
   const port = SECRET.PORT
   await connectDB()
 
-  routesInit(app)
-
   app.use(
     cors({
-      origin: '*', // You can configure this based on your needs
+      origin: 'http://localhost:5173', // You can configure this based on your needs
       credentials: true
     })
   )
+
+  routesInit(app)
 
   const server = createServer(app)
 

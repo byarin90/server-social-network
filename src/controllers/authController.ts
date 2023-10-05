@@ -99,7 +99,7 @@ const authCtrl = {
       saveRefreshTokenOnCookie(res, refreshToken)
 
       // Send response
-      res.status(200).json({ message: 'Logged in successfully' })
+      res.status(200).json({ message: 'Logged in successfully', login: true })
     } catch (error) {
       if (error instanceof z.ZodError) {
         // Validation error
