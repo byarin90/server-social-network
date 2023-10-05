@@ -19,6 +19,7 @@ router.patch('/isActive', authenticateUser, authCtrl.isActiveToggle)
 
 // ? profile
 router.get('/myProfile', authenticateUser, userCtrl.getProfile)
+router.post('/wsToken', authenticateUser, userCtrl.createWsToken)
 
 router.get('/:id', authenticateUser, userCtrl.getProfileById)
 

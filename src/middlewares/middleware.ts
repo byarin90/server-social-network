@@ -6,6 +6,7 @@ import RefreshToken from '../models/refreshTokenModel'
 import { unauthorizedError } from '../lib/error-handling'
 import { type IDecodedToken } from '../lib/@types/express/index'
 import { SECRET } from '../constant/constant'
+import logger from '../lib/logger'
 
 // TODO: authenticateUser is a middleware for validating access and refresh JWT tokens, if access token is invalid,
 // ? it tries to generate a new one using the refresh token.
@@ -19,7 +20,9 @@ export const authenticateUser = async (
   const refreshToken = req.cookies.refresh_token
 
   //! If there's no access token, clear cookies and respond with a 401 Unauthorized error
+  logger.debug('Checking for access token')
   if (!accessToken) {
+    logger.debug('No access token found')
     clearTokensFromCookies(res)
     return res
       .status(401)

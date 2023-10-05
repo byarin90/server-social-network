@@ -1,11 +1,14 @@
-import express, { type Express } from 'express'
+import express, { Express } from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { config } from 'dotenv'
 import { connectDB } from './db/dbConfiguration'
 import { routesInit } from './routes/config.routes'
 import { SECRET } from './constant/constant'
-import Logger from './lib/logger'
+import logger from './lib/logger'
+import { createServer } from 'http'
+import createSocket from './lib/socket/socket'
+
 const bootstrap = async (): Promise<void> => {
   config()
 
@@ -15,20 +18,22 @@ const bootstrap = async (): Promise<void> => {
   const port = SECRET.PORT
   await connectDB()
 
+  app.use(
+    cors({
+      origin: 'http://localhost:5173', // You can configure this based on your needs
+      credentials: true
+    })
+  )
+
   routesInit(app)
 
-  app.use(cors({
-    origin: '*',
-    credentials: true
-  }))
-  const foo = { foo: 'bar' }
-  Logger.error('This is an error message')
-  Logger.info('Information log', foo)
-  Logger.warning('Warning log')
-  Logger.debug('Debug log')
+  const server = createServer(app)
 
-  app.listen(port, () => {
-    console.log(`⚡️[server]: Server is running at http://localhost:${port}`)
+  // Create and attach the Socket.io server to the HTTP server
+  createSocket(server)
+
+  server.listen(port, () => {
+    logger.debug(`⚡️[server]: Server is running at http://localhost:${port}`)
   })
 }
 
