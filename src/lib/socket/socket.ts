@@ -27,7 +27,8 @@ const createSocket = (server: any): void => {
           next(new Error('Authentication error'))
         }
       } catch (err: any) {
-        next(new Error('Socket Error'))
+        next(new Error('socket_error'))
+
       }
     })
 
