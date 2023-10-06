@@ -37,7 +37,7 @@ const userCtrl = {
       logger.debug(`Creating WS token for user ${_id}`)
       const { username } = await User.findOne({ _id }).select('username') as IUser
       // Set the token to expire after a short duration (e.g., 5 minutes)
-      const expiresIn = 5 * 60
+      const expiresIn = '1d'
       logger.debug(`Creating WS token for user ${username} with expiration ${expiresIn}`)
       const wsToken = jwt.sign({ username }, SECRET.JWT_SECRET, { expiresIn })
       res.json({ wsToken })

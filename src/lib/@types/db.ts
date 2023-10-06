@@ -14,12 +14,6 @@ export interface IFriendship extends Document {
   timestamp: Date
 }
 
-export interface IMessage extends Document {
-  sender: string | IUser
-  receiver: string | IUser
-  text: string
-}
-
 export interface IPost extends Document {
   user: string | IUser
   text: string
@@ -43,3 +37,15 @@ export interface IUser extends Document {
   friendRequestsSent: string[]
   friendRequestsReceived: string[]
 };
+
+export interface IMessage extends Document {
+  sender: string | IUser
+  receiver: string | IUser
+  text: string
+}
+
+export interface IRoomChat extends Document {
+  sender: string | IUser
+  receiver: string | IUser
+  messages: string[] | IMessage[]
+}
