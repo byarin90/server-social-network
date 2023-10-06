@@ -3,6 +3,7 @@ import { authenticateUser } from '../middlewares/middleware'
 import authCtrl from '../controllers/authController'
 import userCtrl from '../controllers/userController'
 import { friendshipCtrl } from '../controllers/friendshipController'
+import chatCtrl from '../controllers/chatController'
 
 const router = express.Router() as Router
 
@@ -56,5 +57,5 @@ router.patch('/friendship/unfriend/:id', authenticateUser, friendshipCtrl.unfrie
 // Get Friends
 router.get('/friendship/friends', authenticateUser, friendshipCtrl.getFriends)
 // This route retrieves the list of friends for the authenticated user.
-
+router.get('/chat/:username', authenticateUser, chatCtrl.getRoomChat)
 export default router
