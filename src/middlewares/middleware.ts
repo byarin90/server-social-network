@@ -123,3 +123,12 @@ export const authAdmin = async (
       .json(unauthorizedError.forbidden)
   }
 }
+
+export const validateSocketIOToken = (token: string): string | null => {
+  try {
+    const { username } = jwt.verify(token, SECRET.JWT_SECRET) as any
+    return username
+  } catch (err: any) {
+    return null
+  }
+}
