@@ -28,11 +28,12 @@ const createSocket = (server: any): void => {
         }
       } catch (err: any) {
         next(new Error('socket_error'))
+
       }
     })
 
     io.on('connection', (socket) => {
-      // Join Room/
+      // Join Room//
       socket.on('joinRoom', async (roomId: string) => {
         socket.join(roomId)
       })
