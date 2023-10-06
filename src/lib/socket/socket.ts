@@ -28,7 +28,6 @@ const createSocket = (server: any): void => {
         }
       } catch (err: any) {
         next(new Error('socket_error'))
-
       }
     })
 
