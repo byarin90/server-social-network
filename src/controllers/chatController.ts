@@ -2,13 +2,17 @@ import { type Request, type Response } from 'express'
 import RoomChat from '../models/roomChatModel'
 import { User } from '../models/userModel'
 import Message from '../models/messageModel'
+import logger from '../lib/logger'
 
 const chatCtrl = {
   getRoomChat: async (req: Request, res: Response) => {
+    logger.debug('get room chat')
     const { username } = req.params
     const receiver = await User.findOne({ username })
+    logger.debug('check receiver exists')
     if (!receiver) return res.status(400).json({ err: 'User does not exist for chat.' })
 
+    logger.debug('check receiver is friend')
     if (!receiver.friends.includes(req.payload?._id as string)) {
       return res.status(400).json({
         err: 'You can only chat with your friends.'
@@ -16,6 +20,7 @@ const chatCtrl = {
     }
 
     try {
+      logger.debug('find room chat')
       const roomChat = await RoomChat.findOne({
         $or: [
           { sender: receiver._id, receiver: req.payload?._id },
@@ -39,7 +44,9 @@ const chatCtrl = {
           }
         })
 
+      logger.debug('check room chat exists')
       if (!roomChat) {
+        logger.debug('create new room chat')
         const newRoomChat = new RoomChat({
           sender: req.payload?._id,
           receiver: receiver._id
@@ -54,6 +61,7 @@ const chatCtrl = {
             path: 'receiver',
             select: 'username firstName lastName profilePicture'
           })
+        logger.debug('room chat created')
         return res.json(newRoom)
       }
 

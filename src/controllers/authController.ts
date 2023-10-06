@@ -8,6 +8,7 @@ import RefreshToken from '../models/refreshTokenModel'
 import { IDecodedToken } from '../lib/@types/express/index'
 import { IUser } from '../lib/@types/db'
 import { User } from '../models/userModel'
+import logger from '../lib/logger'
 
 const authCtrl = {
   signUp: async (req: Request, res: Response) => {
@@ -27,6 +28,9 @@ const authCtrl = {
       const userCreated = userWitooutPassword._doc
 
       delete userCreated.password
+
+      logger.debug('User created')
+
       res.status(201).send(userCreated)
     } catch (error: any) {
       if (error.code === 11000 && error.keyPattern.email) {
