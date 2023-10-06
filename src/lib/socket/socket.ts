@@ -24,18 +24,10 @@ const createSocket = (server: any): void => {
           (socket as IExtendedSocket).user = userSocket
           next()
         } else {
-          const err = {
-            message: 'Authentication error',
-            type: 'authentication_error'
-          }
-          next(new Error(JSON.stringify(err)))
+          next(new Error('Authentication error'))
         }
       } catch (err: any) {
-        const err = {
-          message: 'Authentication error',
-          type: 'socket_error'
-        }
-        next(new Error(JSON.stringify(err)))
+        next(new Error('socket_error'))
       }
     })
 
