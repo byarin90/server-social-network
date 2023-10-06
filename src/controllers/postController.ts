@@ -5,9 +5,11 @@ import { z } from 'zod'
 import { User } from '../models/userModel'
 import { type IDecodedToken } from '../lib/@types/express/index'
 import { IPost } from '../lib/@types/db'
+import logger from '../lib/logger'
 
 const postCtrl = {
   getFriendsPosts: async (req: Request, res: Response) => {
+    logger.debug('get friends posts')
     // Get the user id from the request payload
     const { _id } = req.payload as IDecodedToken
 
@@ -46,6 +48,7 @@ const postCtrl = {
   },
 
   getUserPosts: async (req: Request, res: Response) => {
+    logger.debug('get user posts')
     try {
       const posts = await Post.find({ user: req.params.userId })
         .sort({ createdAt: -1 })
