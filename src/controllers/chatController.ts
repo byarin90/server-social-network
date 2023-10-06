@@ -1,6 +1,7 @@
 import { type Request, type Response } from 'express'
 import RoomChat from '../models/roomChatModel'
 import { User } from '../models/userModel'
+import Message from '../models/messageModel'
 
 const chatCtrl = {
   getRoomChat: async (req: Request, res: Response) => {
@@ -60,6 +61,22 @@ const chatCtrl = {
     } catch (err: any) {
       return res.status(500).json({ msg: err.message })
     }
+  },
+  newMessage: async (_data: string) => {
+    const data = JSON.parse(_data) as { message: string, receiverId: string, roomId: string, senderId: string }
+    const { message, receiverId, roomId, senderId } = data
+    const room = await RoomChat.findOne({ _id: roomId }) as any
+    const newMessage = new Message({
+      sender: senderId,
+      receiver: receiverId,
+      messeage: message
+    })
+
+    await newMessage.save()
+    await room.messages.push(newMessage._id)
+    await room.save()
+
+    return data
   }
 }
 

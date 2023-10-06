@@ -1,18 +1,10 @@
 // socket.ts
-import { Server as SocketIoServer, Socket } from 'socket.io'
+import { Server as SocketIoServer } from 'socket.io'
 import logger from '../logger'
-import jwt from 'jsonwebtoken'
-import { SECRET } from '../../constant/constant'
-import Message from '../../models/messageModel'
-import RoomChat from '../../models/roomChatModel'
-const validateToken = (token: string): string | null => {
-  try {
-    const { username } = jwt.verify(token, SECRET.JWT_SECRET) as any
-    return username
-  } catch (err: any) {
-    return null
-  }
-}
+import { User } from '../../models/userModel'
+import chatCtrl from '../../controllers/chatController'
+import { validateSocketIOToken } from '../../middlewares/middleware'
+import { IExtendedSocket, IUserSocket } from '../@types'
 
 const createSocket = (server: any): void => {
   try {
@@ -23,48 +15,39 @@ const createSocket = (server: any): void => {
       }
     })
 
-    interface extendedSocket extends Socket {
-      username: string
-    }
-    io.use((socket, next) => {
-      const token = socket.handshake.auth.token
-      const username = validateToken(token)
-      if (username?.length) {
-        (socket as extendedSocket).username = username
-        next()
-      } else {
-        socket.emit('message', {
-          roomName: 'system',
-          message: 'You are not authenticated. Please log in.'
-        })
-        next(new Error('Authentication error'))
+    io.use(async (socket, next) => {
+      try {
+        const token = socket.handshake.auth.token
+        const username = validateSocketIOToken(token)
+        if (username?.length) {
+          const userSocket = await User.findOne({ username }).select('username firstName lastName email profilePicture').lean() as IUserSocket
+          (socket as IExtendedSocket).user = userSocket
+          next()
+        } else {
+          const err = {
+            message: 'Authentication error',
+            type: 'authentication_error'
+          }
+          next(new Error(JSON.stringify(err)))
+        }
+      } catch (err: any) {
+        const err = {
+          message: 'Authentication error',
+          type: 'socket_error'
+        }
+        next(new Error(JSON.stringify(err)))
       }
     })
 
     io.on('connection', (socket) => {
-      // const username = (socket as extendedSocket).username
       // Join Room/
-      socket.on('joinRoom', async (roomName: string) => {
-        socket.join(roomName)
+      socket.on('joinRoom', async (roomId: string) => {
+        socket.join(roomId)
       })
 
-      // Handle incoming messages within the room
-      // Server-side code snippet
       socket.on('chatMessage', async (data: string) => {
-        const { message, receiverId, roomName, senderId } = JSON.parse(data) as { message: string, receiverId: string, roomName: string, senderId: string }
-        const room = await RoomChat.findOne({ _id: roomName }) as any
-        const newMessage = new Message({
-          sender: senderId,
-          receiver: receiverId,
-          messeage: message
-        })
-        logger.debug('data', JSON.parse(data))
-        await newMessage.save()
-        logger.debug('newMessage', newMessage)
-        logger.debug('room', room)
-        await room.messages.push(newMessage._id)
-        await room.save()
-        io.to(roomName).emit('message', { roomName, message, username: (socket as extendedSocket).username }) // Emitting both roomName and message
+        const { message, roomId } = await chatCtrl.newMessage(data)
+        io.to(roomId).emit('message', { roomId, message, username: (socket as IExtendedSocket).user.username }) // Emitting both roomId and message
       })
     })
   } catch (err: any) {
