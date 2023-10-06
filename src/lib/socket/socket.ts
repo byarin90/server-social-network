@@ -32,7 +32,7 @@ const createSocket = (server: any): void => {
     })
 
     io.on('connection', (socket) => {
-      // Join Room/
+      // Join Room//
       socket.on('joinRoom', async (roomId: string) => {
         socket.join(roomId)
       })
