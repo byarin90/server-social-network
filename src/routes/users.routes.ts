@@ -4,6 +4,7 @@ import authCtrl from '../controllers/authController'
 import userCtrl from '../controllers/userController'
 import { friendshipCtrl } from '../controllers/friendshipController'
 import chatCtrl from '../controllers/chatController'
+import { uploadFile } from '../utils/upload-file'
 
 const router = express.Router() as Router
 
@@ -22,6 +23,7 @@ router.patch('/isActive', authenticateUser, authCtrl.isActiveToggle)
 router.get('/myProfile', authenticateUser, userCtrl.getProfile)
 router.post('/wsToken', authenticateUser, userCtrl.createWsToken)
 
+router.post('/upload-profile-image', uploadFile, userCtrl.uploadImage)
 router.get('/:id', authenticateUser, userCtrl.getProfileById)
 
 // ? Friendship Routes

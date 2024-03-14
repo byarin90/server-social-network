@@ -5,6 +5,9 @@ import jwt from 'jsonwebtoken'
 import { SECRET } from '../constant/constant'
 import { IUser } from '../lib/@types/db'
 import logger from '../lib/logger'
+import { StandardError } from '../utils/error-handling'
+import { s3Client } from '../lib/aws-client'
+import { v4 as uuidv4 } from 'uuid'
 
 const userCtrl = {
   getProfileById: async (req: Request, res: Response) => {
@@ -36,11 +39,44 @@ const userCtrl = {
 
       logger.debug(`Creating WS token for user ${_id}`)
       const { username } = await User.findOne({ _id }).select('username') as IUser
-      // Set the token to expire after a short duration (e.g., 5 minutes)
       const expiresIn = '1d'
       logger.debug(`Creating WS token for user ${username} with expiration ${expiresIn}`)
       const wsToken = jwt.sign({ username }, SECRET.JWT_SECRET, { expiresIn })
       res.json({ wsToken })
+    } catch (err: any) {
+      return res.status(500).json({ msg: err.message })
+    }
+  },
+  uploadImage: async (req: Request, res: Response) => {
+    try {
+      const imageId = uuidv4()
+      const requestFile = (req as any).files as Express.Multer.File[]
+
+      if (!requestFile || requestFile.length === 0) {
+        throw new StandardError('No file provided', 'NO_FILE_PROVIDED', 400)
+      }
+      const file = requestFile[0]
+      logger.info('Uploading image', { file: file.originalname })
+
+      const path = `socialNetwork/profileImages/${imageId}#${file.originalname}`
+      const uploadParams: AWS.S3.PutObjectRequest = {
+        Bucket: SECRET.S3_BUCKET_NAME,
+        Key: path,
+        Body: file.buffer,
+        ContentType: 'image/jpeg'
+      }
+
+      s3Client.upload(uploadParams, (err, data) => {
+        if (err) {
+          logger.error('Error', err)
+          throw new StandardError('Error uploading file', 'UPLOAD_ERROR', 500)
+        }
+
+        if (data) {
+          logger.info('Image Upload Success', { url: data.Location })
+          return res.json({ url: data.Location })
+        }
+      })
     } catch (err: any) {
       return res.status(500).json({ msg: err.message })
     }

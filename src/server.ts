@@ -17,10 +17,9 @@ const bootstrap = async (): Promise<void> => {
   app.use(cookieParser())
   const port = SECRET.PORT
   await connectDB()
-
   app.use(
     cors({
-      origin: 'http://localhost:5173', // You can configure this based on your needs
+      origin: 'http://localhost:3000', // You can configure this based on your needs
       credentials: true
     })
   )
